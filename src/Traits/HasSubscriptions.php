@@ -158,7 +158,6 @@ trait HasSubscriptions
             return $subscription;
         }
 
-        throw new DuplicateException();
+        throw new DuplicateException($planCombination, $this);
     }
 }
-
