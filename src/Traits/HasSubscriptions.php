@@ -99,13 +99,24 @@ trait HasSubscriptions
     /**
      * Check if the subscriber is subscribed to the given plan.
      *
-     * @param int $planId
+     * @param int|string $planId
      *
      * @return bool
      */
-    public function isSubscribedTo(int $planId): bool
+    public function isSubscribedTo(int|string $planId): bool
     {
-        $subscription = $this->subscriptions()->where('plan_id', $planId)->first();
+        $subscriptions = $this->subscriptions();
+
+        switch (gettype($planId)) {
+            case 'string':
+                $plan = (new (config('subby.models.plan')))->where('tag', $planId)->first();
+                $subscriptions->where('plan_id', $plan->id);
+                break;
+            default:
+                $subscriptions->where('plan_id', $planId);
+        }
+
+        $subscription = $subscriptions->first();
 
         return $subscription && $subscription->isActive();
     }
@@ -161,4 +172,3 @@ trait HasSubscriptions
         throw new DuplicateException();
     }
 }
-
